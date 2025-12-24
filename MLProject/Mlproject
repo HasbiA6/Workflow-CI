@@ -1,4 +1,6 @@
-name: diabetes-mlflow-project
+name: workflow-ci-mlflow
+
+python_env: python_env.yaml
 
 entry_points:
   main:
