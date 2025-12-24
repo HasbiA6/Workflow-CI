@@ -23,4 +23,6 @@ jobs:
 
       - name: Run MLflow Project
         run: |
-          mlflow run ./MLProject --env-manager=virtualenv
+              export MLFLOW_CONDA_HOME=""
+              mlflow run ./MLProject --env-manager=virtualenv
+
