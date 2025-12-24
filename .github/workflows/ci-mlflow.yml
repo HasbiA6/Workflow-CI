@@ -25,5 +25,5 @@ jobs:
 
       - name: Jalankan training
         run: |
-          mlflow run MLProject
+          mlflow run ./MLProject
 
