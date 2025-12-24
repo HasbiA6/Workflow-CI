@@ -1,8 +1,6 @@
 import mlflow
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
 
 df = pd.read_csv("diabetes_clean.csv")
 
@@ -20,3 +18,4 @@ with mlflow.start_run():
     acc = accuracy_score(y_test, model.predict(X_test))
     mlflow.log_metric("accuracy", acc)
     mlflow.sklearn.log_model(model, "model")
+
