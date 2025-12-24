@@ -1,6 +1,7 @@
 name: diabetes-mlflow-project
 
-conda_env: conda.yaml
+python_env:
+  requirements: conda.yaml
 
 entry_points:
   main:
