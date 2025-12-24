@@ -1,4 +1,10 @@
+name: diabetes-env
+
+channels:
+  - defaults
+
 dependencies:
+  - python=3.10
   - pip
   - pip:
       - mlflow
