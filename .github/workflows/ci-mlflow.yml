@@ -3,7 +3,7 @@ name: Train ML Model with MLflow
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
@@ -11,19 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ambil kode dari GitHub
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Siapkan Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       - name: Install MLflow
-        run: |
-          pip install mlflow
+        run: pip install mlflow
 
-      - name: Jalankan training
-        run: |
-          mlflow run ./MLProject
-
+      - name: Run MLflow Project
+        run: mlflow run ./MLProject
