@@ -36,7 +36,7 @@ jobs:
 
       - name: Tag Docker Image
         run: |
-          docker tag insurance_model ${{ secrets.DOCKER_HUB_USERNAME }}basic_insurance_regression:latest
+          docker tag basic_insurance_regression ${{ secrets.DOCKER_HUB_USERNAME }}basic_insurance_regression:latest
         
       - name: Push Docker Image
         run: |
