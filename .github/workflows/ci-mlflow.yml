@@ -36,10 +36,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-         IMAGE="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest"
-         echo "IMAGE=$IMAGE"
-         docker build -t "$IMAGE" .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression .
         
       - name: Push Docker image
         run: |
-          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/github-actions
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression
