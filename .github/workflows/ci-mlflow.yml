@@ -33,10 +33,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
-      - name: Build image (one command)
-        run: |
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/github-actions:latest .
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/github-actions:latest
         
       - name: Push Docker image
         run: |
