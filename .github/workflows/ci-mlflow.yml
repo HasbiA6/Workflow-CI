@@ -34,15 +34,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
-        env:
-          USER: ${{ secrets.DOCKERHUB_USERNAME }}
+      - name: Build Docker image
         run: |
-          set -euxo pipefail
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression .
 
-          USER_CLEAN="$(printf '%s' "$USER" | tr -d '\r\n' | xargs)"
-          IMAGE="docker.io/${USER_CLEAN}/basic_insurance_regression:latest"
-
-          echo "IMAGE=$IMAGE"
-          docker build -t "$IMAGE" .
-          docker push "$IMAGE"
+      - name: Push Docker image
+        run: |
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression
