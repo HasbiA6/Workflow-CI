@@ -36,8 +36,8 @@ jobs:
 
       - name: Tag Docker Image
         run: |
-          docker tag insurance_model ${{ secrets.DOCKER_HUB_USERNAME }}/insurance_model:latest
+          docker tag insurance_model ${{ secrets.DOCKER_HUB_USERNAME }}insurance_model:latest
         
       - name: Push Docker Image
         run: |
-         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/insurance_model:latest
+         docker push ${{ secrets.DOCKER_HUB_USERNAME }}insurance_model:latest
