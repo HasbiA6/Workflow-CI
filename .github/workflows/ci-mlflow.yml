@@ -40,7 +40,7 @@ jobs:
         run: |
           set -euxo pipefail
 
-          IMAGE="docker.io/${hasbiabdullah}/basic_insurance_regression:latest"
+          IMAGE="docker.io/${USERNAME}/basic_insurance_regression:latest"
 
           # 1) Build langsung dengan tag final (jadi tidak perlu docker tag lagi)
           docker build -t "$IMAGE" .
