@@ -40,3 +40,4 @@ jobs:
           context: .
           push: true
           tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest
+
