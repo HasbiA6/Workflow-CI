@@ -7,6 +7,7 @@ entry_points:
     parameters:
       data_path:
         type: path
-        default: namadataset_preprocessing/dataset.csv
+        default: data_preprocessed.csv
     command: >
+
       python modelling.py --data_path {data_path}
