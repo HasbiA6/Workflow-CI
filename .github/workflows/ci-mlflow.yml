@@ -35,8 +35,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
         
       - name: Build Docker image
-        run: |
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/github-actions:latest .
+        run: docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/github-actions:latest .
 
       - name: Push Docker image
         run: |
