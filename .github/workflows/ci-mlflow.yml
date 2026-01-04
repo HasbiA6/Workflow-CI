@@ -36,7 +36,7 @@ jobs:
 
       - name: Tag Docker Image
         run: |
-         docker tag github-actions ${{ secrets.DOCKER_HUB_USERNAME }}/github-actions:latest
+         docker tag basic_insurance_regression ${{ secrets.DOCKER_HUB_USERNAME }}/basic_insurance_regression:latest
         
       - name: Push Docker image
         run: |
