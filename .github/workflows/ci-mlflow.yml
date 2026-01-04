@@ -36,9 +36,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest
 
       - name: Push Docker image
         run: |
-          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest .
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest
 
