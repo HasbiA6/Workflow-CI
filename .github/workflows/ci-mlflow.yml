@@ -34,9 +34,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Tag image
-        run: docker tag basic_insurance_regression docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest
+      - name: Build, tag, push (no split)
+        env:
+          USER: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          set -euxo pipefail
 
-        
-      - name: Push image
-        run: docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression:latest
+          IMAGE="docker.io/${USER}/basic_insurance_regression:latest"
+
+          # 1) Build langsung dengan tag final (jadi tidak perlu docker tag lagi)
+          docker build -t "$IMAGE" .
+
+          # 2) Pastikan image memang ada
+          docker images | head
+
+          # 3) Push
+          docker push "$IMAGE"
+
