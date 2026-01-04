@@ -34,9 +34,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression .
-        
-      - name: Push Docker image
+      - name: Tag Docker Image
         run: |
-          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression
+          docker tag basic_insurance_regression ${{ secrets.DOCKER_USERNAME }}/basic_insurance_regression:latest
+        
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/basic_insurance_regressionlatest
