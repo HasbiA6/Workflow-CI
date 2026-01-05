@@ -1,4 +1,4 @@
-name: CI
+name: CI Workflow
 
 on:
   push:
@@ -41,4 +41,3 @@ jobs:
       - name: Push Docker image
         run: |
           docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/basic_insurance_regression
-
