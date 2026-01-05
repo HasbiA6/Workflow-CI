@@ -33,10 +33,3 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build Docker Image
-        run: docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}-f ./basic_insurance_regression/Dockerfile .
-        
-      - name: Push Docker image
-        run: docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}-f ./basic_insurance_regression/Dockerfile
-        
