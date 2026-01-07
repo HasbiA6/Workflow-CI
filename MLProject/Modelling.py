@@ -82,7 +82,6 @@ model = Pipeline(
 # ======================
 # Train + log
 # ======================
-with mlflow.start_run():
     mlflow.sklearn.autolog(log_models=True)
 
     model.fit(X_train, y_train)
@@ -134,3 +133,4 @@ with mlflow.start_run():
 
 
     mlflow.log_artifact(metric_path)
+
