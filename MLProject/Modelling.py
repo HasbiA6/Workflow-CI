@@ -83,12 +83,17 @@ model = Pipeline(
 # Train + log
 # ======================
 with mlflow.start_run():
+    mlflow.sklearn.autolog(log_models=True)
+
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    mlflow.log_metric("accuracy_manual", acc)
-    print("Accuracy:", acc)
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    mlflow.log_metric("mse_test", mse)
+    mlflow.log_metric("r2_test", r2)
+
 
     # ======================
     # Confusion Matrix -> Artifact
@@ -126,5 +131,6 @@ with mlflow.start_run():
     metric_path = os.path.join(BASE_DIR, "metric_info.json")
     with open(metric_path, "w") as f:
         json.dump(metric_info, f, indent=4)
+
 
     mlflow.log_artifact(metric_path)
