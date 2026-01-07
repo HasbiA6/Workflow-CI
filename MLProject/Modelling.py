@@ -1,134 +1,121 @@
-import os
-import json
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
+
+import argparse
 import pandas as pd
 import mlflow
-import mlflow.sklearn
-import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
-
-from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 
-# ======================
-# MLflow Autolog
-# ======================
-mlflow.set_experiment("Basic_Insurance_Regression")
-mlflow.sklearn.autolog(log_models=True)
 
-# ======================
-# Load data (aman untuk lokal & CI)
-# ======================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "data_preprocessed.csv")
-df = pd.read_csv(DATA_PATH)
+def build_pipeline() -> Pipeline:
+    """Build preprocessing + regression pipeline."""
+    num_features = ["age", "bmi", "children"]
+    cat_features = ["sex", "smoker", "region"]
 
-# ======================
-# Target Engineering
-# ======================
-median_charge = df["charges"].median()
-df["target"] = (df["charges"] >= median_charge).astype(int)
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("num", "passthrough", num_features),
+            ("cat", OneHotEncoder(handle_unknown="ignore"), cat_features),
+        ]
+    )
 
-X = df.drop(columns=["charges", "target"])
-y = df["target"]
+    model = Pipeline(
+        steps=[
+            ("preprocessor", preprocessor),
+            ("regressor", LinearRegression()),
+        ]
+    )
+    return model
 
-# ======================
-# Split
-# ======================
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
 
-# ======================
-# Preprocess
-# ======================
-cat_cols = X.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
-num_cols = [c for c in X.columns if c not in cat_cols]
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--data_path",
+        type=str,
+        default="data_preprocessed.csv",
+        help="Path to preprocessed dataset CSV",
+    )
+    parser.add_argument(
+        "--target_col",
+        type=str,
+        default="charges",
+        help="Target column name",
+    )
+    parser.add_argument(
+        "--test_size",
+        type=float,
+        default=0.2,
+        help="Test split size",
+    )
+    parser.add_argument(
+        "--random_state",
+        type=int,
+        default=42,
+        help="Random state for train/test split",
+    )
+    args = parser.parse_args()
 
-numeric_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="median")),
-    ]
-)
+    # -------------------------
+    # MLflow setup (CI-friendly)
+    # -------------------------
+    # Jangan set_tracking_uri di sini. Biarkan env MLFLOW_TRACKING_URI dari workflow yang mengatur.
+    mlflow.set_experiment("Basic_Insurance_Regression")
 
-categorical_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("onehot", OneHotEncoder(handle_unknown="ignore")),
-    ]
-)
+    # Autolog yang stabil untuk MLflow Projects (CI)
+    # log_models=True penting agar folder model/ muncul
+    mlflow.autolog(log_models=True)
 
-preprocess = ColumnTransformer(
-    transformers=[
-        ("num", numeric_transformer, num_cols),
-        ("cat", categorical_transformer, cat_cols),
-    ],
-    remainder="drop",
-)
+    # -------------------------
+    # Load data
+    # -------------------------
+    data = pd.read_csv(args.data_path)
 
-# ======================
-# Model pipeline
-# ======================
-model = Pipeline(
-    steps=[
-        ("preprocess", preprocess),
-        ("clf", LogisticRegression(max_iter=2000)),
-    ]
-)
+    if args.target_col not in data.columns:
+        raise ValueError(
+            f"Target column '{args.target_col}' tidak ditemukan. Kolom tersedia: {list(data.columns)}"
+        )
 
-# ======================
-# Train + log
-# ======================
-mlflow.sklearn.autolog(log_models=True)
+    X = data.drop(args.target_col, axis=1)
+    y = data[args.target_col]
 
-model.fit(X_train, y_train)
+    # -------------------------
+    # Split
+    # -------------------------
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=args.test_size,
+        random_state=args.random_state,
+    )
 
-y_pred = model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
+    # -------------------------
+    # Build + train model
+    # -------------------------
+    model = build_pipeline()
+    model.fit(X_train, y_train)
 
-mlflow.log_metric("mse_test", mse)
-mlflow.log_metric("r2_test", r2)
+    # -------------------------
+    # Evaluate
+    # -------------------------
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
 
-# ======================
-# Confusion Matrix -> Artifact
-# ======================
-cm = confusion_matrix(y_test, y_pred)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-disp.plot()
-plt.title("Insurance Charges Classification")
+    # Manual logging (opsional tapi bagus untuk reviewer)
+    mlflow.log_metric("mse_test", float(mse))
+    mlflow.log_metric("r2_test", float(r2))
 
-cm_path = os.path.join(BASE_DIR, "training_confusion_matrix.png")
-plt.savefig(cm_path, bbox_inches="tight")
-plt.close()
-mlflow.log_artifact(cm_path)
+    print("Training selesai.")
+    print(f"MSE Test: {mse:.4f}")
+    print(f"R2  Test: {r2:.4f}")
 
-# ======================
-# Simpan model ke MLflow
-# ======================
-mlflow.sklearn.log_model(
-    sk_model=model,
-    artifact_path="model"
- )
 
-# ======================
-# Metric Info JSON
-# ======================
-metric_info = {
-    "accuracy": acc,
-    "model_type": "LogisticRegression",
-    "target_definition": "charges >= median",
-    "median_charges": float(median_charge),
-    "categorical_cols": cat_cols,
-     "numeric_cols": num_cols,
- }
-
-metric_path = os.path.join(BASE_DIR, "metric_info.json")
-with open(metric_path, "w") as f:
-    json.dump(metric_info, f, indent=4)
-
-mlflow.log_artifact(metric_path)
+if __name__ == "__main__":
+    main()
