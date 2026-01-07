@@ -17,7 +17,8 @@ from sklearn.impute import SimpleImputer
 # ======================
 # MLflow Autolog
 # ======================
-mlflow.sklearn.autolog()
+mlflow.set_experiment("Basic_Insurance_Regression")
+mlflow.sklearn.autolog(log_models=True)
 
 # ======================
 # Load data (aman untuk lokal & CI)
@@ -82,55 +83,52 @@ model = Pipeline(
 # ======================
 # Train + log
 # ======================
-    mlflow.sklearn.autolog(log_models=True)
+mlflow.sklearn.autolog(log_models=True)
 
-    model.fit(X_train, y_train)
+model.fit(X_train, y_train)
 
-    y_pred = model.predict(X_test)
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
 
-    mlflow.log_metric("mse_test", mse)
-    mlflow.log_metric("r2_test", r2)
+mlflow.log_metric("mse_test", mse)
+mlflow.log_metric("r2_test", r2)
 
+# ======================
+# Confusion Matrix -> Artifact
+# ======================
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot()
+plt.title("Insurance Charges Classification")
 
-    # ======================
-    # Confusion Matrix -> Artifact
-    # ======================
-    cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-    disp.plot()
-    plt.title("Insurance Charges Classification")
+cm_path = os.path.join(BASE_DIR, "training_confusion_matrix.png")
+plt.savefig(cm_path, bbox_inches="tight")
+plt.close()
+mlflow.log_artifact(cm_path)
 
-    cm_path = os.path.join(BASE_DIR, "training_confusion_matrix.png")
-    plt.savefig(cm_path, bbox_inches="tight")
-    plt.close()
-    mlflow.log_artifact(cm_path)
+# ======================
+# Simpan model ke MLflow
+# ======================
+mlflow.sklearn.log_model(
+    sk_model=model,
+    artifact_path="model"
+ )
 
-    # ======================
-    # Simpan model ke MLflow
-    # ======================
-    mlflow.sklearn.log_model(
-        sk_model=model,
-        artifact_path="model"
-    )
+# ======================
+# Metric Info JSON
+# ======================
+metric_info = {
+    "accuracy": acc,
+    "model_type": "LogisticRegression",
+    "target_definition": "charges >= median",
+    "median_charges": float(median_charge),
+    "categorical_cols": cat_cols,
+     "numeric_cols": num_cols,
+ }
 
-    # ======================
-    # Metric Info JSON
-    # ======================
-    metric_info = {
-        "accuracy": acc,
-        "model_type": "LogisticRegression",
-        "target_definition": "charges >= median",
-        "median_charges": float(median_charge),
-        "categorical_cols": cat_cols,
-        "numeric_cols": num_cols,
-    }
+metric_path = os.path.join(BASE_DIR, "metric_info.json")
+with open(metric_path, "w") as f:
+    json.dump(metric_info, f, indent=4)
 
-    metric_path = os.path.join(BASE_DIR, "metric_info.json")
-    with open(metric_path, "w") as f:
-        json.dump(metric_info, f, indent=4)
-
-
-    mlflow.log_artifact(metric_path)
-
+mlflow.log_artifact(metric_path)
