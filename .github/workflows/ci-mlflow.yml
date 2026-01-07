@@ -26,6 +26,7 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: "file:./mlruns"
         run: |
+          ls -la
           mlflow run MLProject --env-manager=local -P data_path=data_preprocessed.csv
         
       - name: Login to Docker Hub
