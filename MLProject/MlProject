@@ -7,8 +7,6 @@ entry_points:
     parameters:
       data_path:
         type: path
-        default: data_preprocessed.csv
+        default: ../data_preprocessed.csv
     command: >
-
       python Modelling.py --data_path {data_path}
-
