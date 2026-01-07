@@ -10,4 +10,5 @@ entry_points:
         default: data_preprocessed.csv
     command: >
 
-      python modelling.py --data_path {data_path}
+      python Modelling.py --data_path {data_path}
+
